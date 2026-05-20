@@ -48,7 +48,7 @@ public class Catalogo {
     @NotNull(message = "[+] El Stock No Puede Quedar Nulo ... ")
     private Integer stock;
 
-    @Min(value = 9990, message = "[+] El Precio Debe Ser Mayor A 9990 ... ")
+    @Positive
     @NotNull(message = "[+] El Precio No Debe Ser Nulo ... ")
     private Integer precio;
 
