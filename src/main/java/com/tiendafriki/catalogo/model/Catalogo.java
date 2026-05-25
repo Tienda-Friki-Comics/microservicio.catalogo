@@ -1,8 +1,7 @@
-// --- CATALOGO --- //
+// === CATALOGO === //
 
 package com.tiendafriki.catalogo.model;
 
-import jakarta.validation.constraints.*;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,39 +16,33 @@ public class Catalogo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotBlank(message = "[+] El Titulo No Puede Estar En Blanco ... ")
     @Column(nullable = false, length = 100)
     private String titulo;
 
-    @NotBlank(message = "[+] El Genero No Puede Quedar Vacio ... ")
+    @Column(nullable = false)
     private String genero;
 
-    @Min(value = 1500, message = "[+] El Año Debe Ser Mayor A 1.500 ... ")
-    @NotNull(message = "[+] El Año No Puede Quedar Nulo ... ")
+    @Column(nullable = false)
     private Integer anio;
 
-    @NotBlank(message = "[+] El Autor No Puede Quedar Vacio ... ")
+    @Column(nullable = false)
     private String autor;
 
     // Relación con editorial
 
-    @ManyToOne // Una editorial puede aparecer en muchos productos
-    @JoinColumn(name = "ID_Editorial", nullable = false) // FK con editorial
-    @NotNull(message = "[+] La Editorial No Puede Quedar Nula ... ")
+    @ManyToOne
+    @JoinColumn(name = "ID_Editorial", nullable = false)
     private Editorial editorial;
 
     // Relación con categoria
-    @ManyToOne // Una categoria puede aparecer en muchos productos
-    @JoinColumn(name = "ID_Categoria", nullable = false) // FK con categoria
-    @NotNull(message = "[+] La Categoria No Puede Quedar Nula ... ")
+
+    @ManyToOne
+    @JoinColumn(name = "ID_Categoria", nullable = false)
     private Categoria categoria;
 
-    @Min(value = 1, message = "[+] El Numero Del Stock Debe Ser Mayor A 1 ... ")
-    @NotNull(message = "[+] El Stock No Puede Quedar Nulo ... ")
+    @Column(nullable = false)
     private Integer stock;
 
-    @Positive
-    @NotNull(message = "[+] El Precio No Debe Ser Nulo ... ")
+    @Column(nullable = false)
     private Integer precio;
-
 }

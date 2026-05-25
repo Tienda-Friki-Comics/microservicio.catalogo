@@ -3,10 +3,12 @@ package com.tiendafriki.catalogo.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.tiendafriki.catalogo.repository.*;
-import com.tiendafriki.catalogo.dto.ProductoResumenDTO;
+import com.tiendafriki.catalogo.dto.ProductoRequestDTO;
+import com.tiendafriki.catalogo.dto.ProductoResponseDTO;
 import com.tiendafriki.catalogo.model.*;
 import java.util.Optional;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class CatalogoService {
@@ -24,9 +26,9 @@ public class CatalogoService {
 
     // Este método adaptará el objeto producto al formato del ProductoResumenDTO
 
-    private ProductoResumenDTO convertirADTO(Catalogo producto) {
+    private ProductoResponseDTO convertirADTO(Catalogo producto) {
 
-        return new ProductoResumenDTO(
+        return new ProductoResponseDTO(
                 producto.getId(),
                 producto.getTitulo(),
                 producto.getGenero(),
@@ -44,22 +46,26 @@ public class CatalogoService {
     // Este método devuelve el listado de productos por medio del DTO
     // que resume los datos de los productos
 
-    public List<ProductoResumenDTO> listarDTO(){
+    public List<ProductoResponseDTO> listar(){
 
         return repository.findAll()    // Obtiene todos los productos de la BD
             .stream()                  // Recorre la lista de productos
             .map(this::convertirADTO)  // Convierte cada producto a DTO mediante el método convertirADTO
             .toList(); // Convierte el resultado nuevamente en una lista
 
+
     }
 
     
     // -- (GET): BUSCAR POR ID -- //
 
-    public Optional<ProductoResumenDTO> buscarPorId(Integer id) {
+    public ProductoResponseDTO buscarPorId(Integer id) {
 
     return repository.findById(id)
-            .map(this::convertirADTO); // Convierte el producto encontrado a DTO
+            .map(this::convertirADTO) // Convierte el producto encontrado a DTO
+            .orElseThrow(() ->
+                new NoSuchElementException
+                ( "[ERROR] Producto no encontrado [X_X] ..."));
 
     }
 
@@ -68,262 +74,391 @@ public class CatalogoService {
     // Este método devolverá cualquier producto que coincida
     // con el titulo ingresado por el usuario
 
-    public List<ProductoResumenDTO> buscarPorTitulo(String titulo) {
+    public List<ProductoResponseDTO> buscarPorTitulo(String titulo) {
 
-    return repository.findByTituloContainingIgnoreCase(titulo)
-            .stream() // Recorre la lista de productos
-            .map(this::convertirADTO) // Convierte cada producto a DTO
-            .toList();
+        // Buscamos productos por titulo
+        // y lo guardamos en una lista de productos de catalogo
 
+        List<Catalogo> productos = repository.findByTituloContainingIgnoreCase(titulo);
+
+        // Validamos si la lista de productos esta vacia
+
+        if (productos.isEmpty()) {
+
+            // Si la lista esta vacia, entonces no hay productos con ese titulo
+
+            throw new NoSuchElementException(
+                    "[ERROR] No se encontraron productos con ese titulo [X_X] ...");
+
+        }
+
+        // En caso contrario,
+        // Convertimos la lista de productos al formato del DTO y lo retornamos
+
+        return productos.stream()
+                .map(this::convertirADTO)
+                .toList();
     }
     
 
-
     // -- (GET): BUSCAR POR GENERO -- //
 
-    public List<ProductoResumenDTO> buscarPorGenero(String genero) {
+    public List<ProductoResponseDTO> buscarPorGenero(String genero) {
 
-    return repository.findByGeneroIgnoreCase(genero)
-            .stream()
-            .map(this::convertirADTO)
-            .toList();
+        List<Catalogo> productos = repository.findByGeneroIgnoreCase(genero);
+                
+        if (productos.isEmpty()) {
+
+            // Si la lista esta vacia, devolvemos mensaje no encontrado
+
+            throw new NoSuchElementException(
+                    "[ERROR] No se encontraron productos por ese genero [X_X] ...");
+
+        }
+
+        // En caso contrario,
+        // Convertimos la lista de productos al formato del DTO y lo retornamos
+        
+        return productos.stream()
+                .map(this::convertirADTO)
+                .toList();
 
     }
 
 
     // -- (GET): BUSCAR POR AUTOR -- //
 
-    public List<ProductoResumenDTO> buscarPorAutor(String autor) {
+    public List<ProductoResponseDTO> buscarPorAutor(String autor) {
 
-    return repository.findByAutorIgnoreCase(autor)
-            .stream()
-            .map(this::convertirADTO)
-            .toList();
+        // Se hace una lista de productos y se busca por el parametro indicado
 
+        List<Catalogo> productos = repository.findByAutorIgnoreCase(autor);
+
+        // Si la lista esta vacia
+
+        if (productos.isEmpty()) {
+
+            // Devolvera mensaje de no encontrado
+
+            throw new NoSuchElementException(
+                    "[ERROR] No se encontraron productos por ese autor [X_X] ...");
+
+        }
+
+        // En caso contrario,
+        // Convertimos la lista de productos al formato del DTO y lo retornamos
+        
+        return productos.stream()
+                .map(this::convertirADTO)
+                .toList();
+            
     }
 
 
     // -- (GET): BUSCAR POR CATEGORIA -- //
 
-    public List<ProductoResumenDTO> buscarPorCategoria(String categoria) {
+    public List<ProductoResponseDTO> buscarPorCategoria(String categoria) {
 
-    return repository.findByCategoriaNombreIgnoreCase(categoria)
-            .stream()
-            .map(this::convertirADTO)
-            .toList();
+        // Se hace una lista de productos y se busca por el parametro indicado
+
+        List<Catalogo> productos = repository.findByCategoriaNombreIgnoreCase(categoria);
+        
+        // Si la lista esta vacia
+
+        if (productos.isEmpty()) {
+
+            // Devolvera mensaje de no encontrado
+
+            throw new NoSuchElementException(
+                    "[ERROR] No se encontraron productos por esa categoría [X_X] ...");
+
+        }
+
+        // En caso contrario,
+        // Convertimos la lista de productos al formato del DTO y lo retornamos
+        
+        return productos.stream()
+                .map(this::convertirADTO)
+                .toList();
 
     }
 
 
     // -- (GET): BUSCAR POR EDITORIAL -- //
 
-    public List<ProductoResumenDTO> buscarPorEditorial(String editorial) {
+    public List<ProductoResponseDTO> buscarPorEditorial(String editorial) {
 
-    return repository.findByEditorialNombreIgnoreCase(editorial)
-            .stream()
-            .map(this::convertirADTO)
-            .toList();
+        List<Catalogo> productos = repository.findByEditorialNombreIgnoreCase(editorial);
+
+        // Si la lista esta vacia
+
+        if (productos.isEmpty()) {
+
+            // Devolvera mensaje de no encontrado
+
+            throw new NoSuchElementException(
+                    "[ERROR] No se encontraron productos por esa editorial [X_X] ...");
+
+        }
+
+        // En caso contrario,
+        // Convertimos la lista de productos al formato del DTO y lo retornamos
+        
+        return productos.stream()
+                .map(this::convertirADTO)
+                .toList();
 
     }
-
-
 
 
     // -- (GET): BUSCAR POR AÑO -- //
 
-    public List<ProductoResumenDTO> buscarPorAnio(Integer anio) {
+    public List<ProductoResponseDTO> buscarPorAnio(Integer anio) {
 
-    return repository.findByAnio(anio)
-            .stream()
-            .map(this::convertirADTO)
-            .toList();
+        List<Catalogo> productos = repository.findByAnio(anio);
+        
+        // Si la lista esta vacia
+
+        if (productos.isEmpty()) {
+
+            // Devolvera mensaje de no encontrado
+
+            throw new NoSuchElementException(
+                    "[ERROR] No se encontraron productos por ese año [X_X] ...");
+
+        }
+
+        // En caso contrario,
+        // Convertimos la lista de productos al formato del DTO y lo retornamos
+        
+        return productos.stream()
+                .map(this::convertirADTO)
+                .toList();
 
     }
 
+    
+    // === MÉTODO GUARDAR PRODUCTO (POST) === //
 
+    public String guardar(ProductoRequestDTO productoDTO) {
 
-    // -- MÉTODO GUARDAR PRODUCTO (POST) -- //
+        // Validar que el producto NO exista
 
-    public String guardar(Catalogo producto) {
+        Optional<Catalogo> existente =
+                repository.findByTituloIgnoreCase(
+                        productoDTO.getTitulo()
+                );
 
-        // Validar que el producto NO exista:
+        if (existente.isPresent()) {
 
-        // buscamos por titulo exacto en el repository y lo guardamos en existente
-
-        Optional<Catalogo> existente = repository.findByTituloIgnoreCase(producto.getTitulo());
-
-        // isPresent(): Comrpueba si el contenedor Optional no tiene nulo
-        // Comprobamos que el producto existente no sea nulo y este presente en la base de datos
-
-        if(existente.isPresent()){
-
-            return "[-] El producto del catalogo ya existe [X_X] ...";
-
+            throw new IllegalArgumentException(
+                    "[ERROR] El producto del catalogo ya existe [X_X] ...");
         }
 
-        // Validar que la CATEGORÍA ingresada EXISTA:
+        // === VALIDAR CATEGORIA === //
 
-        if (producto.getCategoria() != null) {
-            Optional<Categoria> catOpt = categoriaRepo.findById(
-                producto.getCategoria().getId()
+        Optional<Categoria> catOpt =
+                categoriaRepo.findByNombreIgnoreCase(
+                        productoDTO.getCategoria()
+                );
+
+        if (catOpt.isEmpty()) {
+
+            throw new NoSuchElementException(
+                    "[ERROR] Categoría No Encontrada [X_X] ...");
+        }
+
+        // === VALIDAR EDITORIAL === //
+
+        Optional<Editorial> edOpt =
+                editorialRepo.findByNombreIgnoreCase(
+                        productoDTO.getEditorial()
+                );
+
+        if (edOpt.isEmpty()) {
+
+            throw new NoSuchElementException(
+                    "[ERROR] Editorial No Encontrada [X_X] ..."
             );
-
-            if (catOpt.isEmpty()) {
-                return "[-] Categoria No Encontrada [X_X] ... ";
-            }
-
-            producto.setCategoria(catOpt.get());
         }
 
-        // Validar que la EDITORIAL ingresada EXISTA:
+        // === CREAR OBJETO CATALOGO === //
 
-        if (producto.getEditorial() != null) {
-            Optional<Editorial> edOpt = editorialRepo.findById(
-                    producto.getEditorial().getId()
-            );
+        Catalogo producto = new Catalogo();
 
-            if (edOpt.isEmpty()) {
-                return "[-] Editorial No Encontrada [X_X] ... ";
-            }
+        producto.setTitulo(productoDTO.getTitulo());
 
-            producto.setEditorial(edOpt.get());
-        }
+        producto.setGenero(productoDTO.getGenero());
+
+        producto.setAnio(productoDTO.getAnio());
+
+        producto.setAutor(productoDTO.getAutor());
+
+        producto.setStock(productoDTO.getStock());
+
+        producto.setPrecio(productoDTO.getPrecio());
+
+        // Convertimos String -> Entidad real
+
+        producto.setCategoria(catOpt.get());
+
+        producto.setEditorial(edOpt.get());
+
+        // Guardamos producto
 
         repository.save(producto);
 
-        return "[+] El Producto se a agregado correctamente al Catalogo ... ";
-
+        return "[+] El Producto se agregó correctamente al catálogo ... ";
     }
 
-    // -- MÉTODO ACTUALIZAR PRODUCTO (PUT)-- //
+    // === MÉTODO ACTUALIZAR PRODUCTO (PUT) === //
 
-    public String actualizar(Catalogo producto) {
+    public String actualizar(Integer id, ProductoRequestDTO productoDTO) {
 
-        // Creamos una lista de productos del catalogo:
+        // Buscamos el producto por ID
 
-        List<Catalogo> listaCatalogo = repository.findAll();
+        Optional<Catalogo> productoOpt =
+                repository.findById(id);
 
-        // Recorremos la lista de productos del catalogo
+        // Validamos existencia
 
-        for (Catalogo p : listaCatalogo) {
+        if (productoOpt.isEmpty()) {
 
-            // Si coincide con la id del producto que buscamos
-            if (p.getId().equals(producto.getId())) {
-
-                // Validar si existe la categoría:
-
-                if (producto.getCategoria() != null) {
-                    Optional<Categoria> catOpt = categoriaRepo.findById(
-                            producto.getCategoria().getId()
-                    );
-
-                    if (catOpt.isEmpty()) {
-                        return "[-] Categoria No Encontrada [X_X] ... ";
-                    }
-
-                    producto.setCategoria(catOpt.get());
-                }
-
-                // Validar si existe la editorial:
-                if (producto.getEditorial() != null) {
-                    Optional<Editorial> edOpt = editorialRepo.findById(
-                            producto.getEditorial().getId()
-                    );
-
-                    if (edOpt.isEmpty()) {
-                        return "[-] Editorial No Encontrada [X_X] ... ";
-                    }
-
-                    producto.setEditorial(edOpt.get());
-                }
-
-                repository.save(producto);
-
-                return "[+] El Producto Del Catalogo Fue Actualizado ... ";
-            }
+            throw new NoSuchElementException(
+                    "[ERROR] Producto No Encontrado en el Catalogo [X_X] ... "
+            );
         }
-        
 
-        return "[-] Producto En El Catalogo No Encontrado [X_X] ... ";
+        // === VALIDAR CATEGORIA === //
+
+        Optional<Categoria> catOpt =
+                categoriaRepo.findByNombreIgnoreCase(
+                        productoDTO.getCategoria()
+                );
+
+        if (catOpt.isEmpty()) {
+
+            throw new NoSuchElementException(
+                    "[ERROR] Categoria No Encontrada [X_X] ..."
+            );
+        }
+
+        // === VALIDAR EDITORIAL === //
+
+        Optional<Editorial> edOpt =
+                editorialRepo.findByNombreIgnoreCase(
+                        productoDTO.getEditorial()
+                );
+
+        if (edOpt.isEmpty()) {
+
+            throw new NoSuchElementException(
+                    "[ERROR] Editorial No Encontrada [X_X] ..."
+            );
+        }
+
+        // Obtenemos el producto real
+
+        Catalogo producto = productoOpt.get();
+
+        // Actualizamos datos
+
+        producto.setTitulo(productoDTO.getTitulo());
+
+        producto.setGenero(productoDTO.getGenero());
+
+        producto.setAnio(productoDTO.getAnio());
+
+        producto.setAutor(productoDTO.getAutor());
+
+        producto.setStock(productoDTO.getStock());
+
+        producto.setPrecio(productoDTO.getPrecio());
+
+        // Convertimos String -> Entidad
+
+        producto.setCategoria(catOpt.get());
+
+        producto.setEditorial(edOpt.get());
+
+        // Guardamos cambios
+
+        repository.save(producto);
+
+        return "[+] El Producto Del Catalogo Fue Actualizado ... ";
     }
 
     // -- MÉTODO ELIMINAR PRODUCTO (DELETE) -- //
 
     public String eliminar(Integer id) {
 
-        List<Catalogo> listaCatalogo = repository.findAll();
+        // Buscamos el producto por ID
 
-        for (Catalogo producto : listaCatalogo) {
-            if (producto.getId().equals(id)) {
-                repository.deleteById(id);
-                return "[+] Producto Eliminado Del Catalogo ... ";
-            }
+        Optional<Catalogo> productoOpt =
+                repository.findById(id);
+
+        // Validamos existencia
+
+        if (productoOpt.isEmpty()) {
+
+            throw new NoSuchElementException(
+                    "[ERROR] Producto No Encontrado en el Catalogo [X_X] ... ");
         }
 
-        return "[-] Producto No Encontrado En El Catalogo [X_X] ... ";
+        // Eliminamos producto
+
+        repository.deleteById(id);
+
+        return "[+] Producto Eliminado Del Catalogo ... ";
     }
 
 
-    /*
+    // === MÉTODO PARA DESCONTAR STOCK AUTOMATICAMENTE (PUT) === //
 
-    // ========================== MÉTODOS (GET) SIN DTO ========================== //
+    public String descontarStock(Integer productoId, Integer cantidad) {
 
-    // -- GET: LISTAR TODOS LOS PRODUCTOS (SIN DTO):  -- //
+        // Buscamos el producto por ID
 
-    public List<Catalogo> listar() {
-        return repository.findAll();
+        Optional<Catalogo> productoOpt =
+                repository.findById(productoId);
+
+        // Validamos existencia del producto
+
+        if (productoOpt.isEmpty()) {
+
+            throw new NoSuchElementException(
+                    "[ERROR] Producto no encontrado [X_X] ..."
+            );
+        }
+
+        // Obtenemos el producto encontrado
+
+        Catalogo producto = productoOpt.get();
+
+        // === VALIDAR STOCK DISPONIBLE === //
+
+        // Si el stock actual es menor
+        // a la cantidad solicitada
+
+        if (producto.getStock() < cantidad) {
+
+            throw new IllegalArgumentException(
+                    "[ERROR] Stock insuficiente para el producto "
+                            + producto.getTitulo()
+                            + " [X_X] ..."
+            );
+        }
+
+        // === DESCONTAR STOCK === //
+
+        producto.setStock(producto.getStock() - cantidad);
+
+        // Guardamos cambios
+
+        repository.save(producto);
+
+        return "[+] Stock actualizado correctamente";
     }
-
-     // -- BUSCAR POR ID -- //
-
-    public Optional<Catalogo> buscarPorId(Integer id) {
-        
-        return repository.findById(id);
-    }
-
-    // -- BUSCAR POR TITULO POR COINCIDENCIA -- //
-
-    // Este método devolverá cualquier producto que coincida
-    // con el titulo ingresado por el usuario
-
-    public List<Catalogo> buscarPorTitulo(String titulo) {
-        return repository.findByTituloContainingIgnoreCase(titulo);
-    }
-
-    // -- BUSCAR POR GENERO -- //
-
-    public List<Catalogo> buscarPorGenero(String genero) {
-        return repository.findByGeneroIgnoreCase(genero);
-    }
-
-    // -- BUSCAR POR AUTOR -- //
-
-    public List<Catalogo> buscarPorAutor(String autor) {
-        return repository.findByAutorIgnoreCase(autor);
-    }
-
-    // -- BUSCAR POR CATEGORIA  -- //
-
-    public List<Catalogo> buscarPorCategoria(String categoria) {
-        return repository.findByCategoriaNombreIgnoreCase(categoria);
-    }
-
-    // -- BUSCAR POR EDITORIAL -- //
-
-    public List<Catalogo> buscarPorEditorial(String editorial) {
-        return repository.findByEditorialNombreIgnoreCase(editorial);
-    }
-
-    // -- BUSCAR POR AÑO -- //
-
-    public List<Catalogo> buscarPorAnio(Integer anio) {
-        return repository.findByAnio(anio);
-    }
-
-    // =========================================================================== //
-
-    */
-
 
 }
 

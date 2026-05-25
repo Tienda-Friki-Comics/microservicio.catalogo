@@ -1,7 +1,6 @@
 package com.tiendafriki.catalogo.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -30,88 +29,55 @@ public class EditorialController {
     // -- GET: LISTAR TODO -- //
 
     @GetMapping("/listar")
-    public ResponseEntity<?> listar() {
+    public List<Editorial> listar() {
 
-        List<Editorial> editorial = Service.listar();
+        return Service.listar();
 
-        return ResponseEntity.ok(editorial);
     }
-
 
     // -- GET: BUSCAR POR ID -- //
 
     @GetMapping("/buscarxid/{id}")
-    public ResponseEntity<?> buscarPorId(@PathVariable Integer id) {
+    public Editorial buscarPorId(@PathVariable Integer id) {
 
-        Optional<Editorial> editorial = Service.buscarPorId(id);
+        return Service.buscarPorId(id);
 
-        if (editorial.isEmpty()) {
-
-            return ResponseEntity.status(404).body("Editorial no encontrada [X_X]");
-        }
-
-        return ResponseEntity.ok(editorial);
     }
 
     // -- GET: BUSCAR POR NOMBRE -- //
 
     @GetMapping("/nombre/{nombre}")
-    public ResponseEntity<?> buscarPorNombre(@PathVariable String nombre) {
+    public Editorial buscarPorNombre(@PathVariable String nombre) {
 
-        Optional<Editorial> editorial = Service.buscarPorNombre(nombre);
+        return Service.buscarPorNombre(nombre);
 
-        if (editorial.isEmpty()) {
-
-            return ResponseEntity.status(404).body("Editorial no encontrada [X_X]");
-        }
-
-        return ResponseEntity.ok(editorial);
     }
 
     // -- POST: CREAR EDITORIAL -- //
     
     @PostMapping("/crear")
-    public ResponseEntity<?> Crear(@Valid @RequestBody Editorial editorial) {
+    public ResponseEntity<String> Crear(@Valid @RequestBody Editorial editorial) {
 
     String mensaje = Service.guardar(editorial);
-
-    if (mensaje.toLowerCase().contains("ya existe")) {
-
-        return ResponseEntity.badRequest().body(mensaje);
-    }
-
-
     return ResponseEntity.status(201).body(mensaje);
 }
     
     // -- DELETE : ELIMINAR CATEGORIA -- //
 
     @DeleteMapping("/eliminarxid/{id}")
-    public ResponseEntity<?> Eliminar(@PathVariable Integer id) {
+    public ResponseEntity<String> Eliminar(@PathVariable Integer id) {
         
         String mensaje = Service.eliminar(id);
-
-        if (mensaje.toLowerCase().contains("no encontrado") ||
-            mensaje.toLowerCase().contains("no encontrada")) {
-
-            return ResponseEntity.status(404).body(mensaje);
-        }
-        
         return ResponseEntity.ok(mensaje);
 
     }
 
     // -- PUT: ACTUALIZAR CATEGORIA -- //
 
-    @PutMapping("/actualizar")
-    public ResponseEntity<?> Actualizar(@Valid @RequestBody Editorial editorial) {
+    @PutMapping("/actualizarxid/{id}")
+    public ResponseEntity<String> Actualizar(@PathVariable Integer id, @Valid @RequestBody Editorial editorial) {
 
-        String mensaje = Service.actualizar(editorial);
-
-        if (mensaje.toLowerCase().contains("no encontrado") ||
-            mensaje.toLowerCase().contains("no encontrada")) {
-                return ResponseEntity.status(404).body(mensaje);
-        }
+        String mensaje = Service.actualizar(id, editorial);
         return ResponseEntity.ok(mensaje);
         
     }

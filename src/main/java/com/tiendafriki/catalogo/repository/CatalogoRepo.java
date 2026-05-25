@@ -32,4 +32,10 @@ public interface CatalogoRepo extends JpaRepository<Catalogo, Integer> {
     List<Catalogo> findByEditorialNombreIgnoreCase(String nombreEditorial);
 
     List<Catalogo> findByCategoriaNombreIgnoreCase(String nombreCategoria);
+
+     // === VALIDAR USO DE RELACIONES === //
+
+    boolean existsByEditorialId(Integer id);
+
+    boolean existsByCategoriaId(Integer id);
 }

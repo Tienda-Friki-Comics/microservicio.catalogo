@@ -18,7 +18,7 @@ public class Editorial {
     @Column(name = "ID_Editorial")
     private Integer id;
 
-    @NotBlank(message = "[+] El nombre No Puede Estar En Blanco ... ")
+    @NotBlank(message = "[ERROR] El nombre No Puede Estar En Blanco  [X_X] ... ")
     @Column(nullable = false, length = 100)
     private String nombre;
 

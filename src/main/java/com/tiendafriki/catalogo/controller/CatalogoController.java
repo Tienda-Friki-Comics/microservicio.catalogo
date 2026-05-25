@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import com.tiendafriki.catalogo.service.*;
-import com.tiendafriki.catalogo.dto.ProductoResumenDTO;
-import com.tiendafriki.catalogo.model.*;
+import com.tiendafriki.catalogo.dto.ProductoRequestDTO;
+import com.tiendafriki.catalogo.dto.ProductoResponseDTO;
 import jakarta.validation.Valid;
 import java.util.*;
 
@@ -19,174 +19,116 @@ public class CatalogoController {
     // -- GET: LISTAR TODO -- //
 
     @GetMapping("/listar")
-    public ResponseEntity<?> listar() {
+    public List<ProductoResponseDTO> listar() {
 
-        List<ProductoResumenDTO> catalogo = Service.listarDTO();
+        //List<ProductoResumenDTO> catalogo = Service.listarDTO();
 
-        if (catalogo.isEmpty()) {
-            return ResponseEntity.status(404)
-                    .body("Productos Del Catalogo No Encontrado [X_X]");
-        }
-
-        return ResponseEntity.ok(catalogo);
+        return Service.listar();
     }
 
     // -- GET: BUSCAR POR ID -- //
 
     @GetMapping("/buscarxid/{id}")
-    public ResponseEntity<?> buscarPorId(@PathVariable Integer id) {
+    public ProductoResponseDTO buscarPorId(@PathVariable Integer id) {
 
-        Optional<ProductoResumenDTO> producto = Service.buscarPorId(id);
-
-        if (producto.isEmpty()) {
-
-            return ResponseEntity.status(404).body("Producto no encontrado [X_X]");
-        }
-
-        return ResponseEntity.ok(producto);
+        return Service.buscarPorId(id);
     }
 
     // -- GET: BUSCAR POR TITULO -- //
 
     @GetMapping("/titulo/{titulo}")
-    public ResponseEntity<?> buscarPorTitulo(@PathVariable String titulo) {
+    public List<ProductoResponseDTO> buscarPorTitulo(@PathVariable String titulo) {
         
-        List<ProductoResumenDTO> producto = Service.buscarPorTitulo(titulo);
+        return Service.buscarPorTitulo(titulo);
 
-        if (producto.isEmpty()) {
-
-            return ResponseEntity.status(404).body("Producto no encontrado [X_X]");
-        }
-
-        return ResponseEntity.ok(producto);
     }
 
     // -- GET: BUSCAR POR GENERO -- //
 
     @GetMapping("/genero/{genero}")
-    public ResponseEntity<?> buscarPorGenero(@PathVariable String genero) {
+    public List<ProductoResponseDTO> buscarPorGenero(@PathVariable String genero) {
         
-        List<ProductoResumenDTO> producto = Service.buscarPorGenero(genero);
-
-        if (producto.isEmpty()) {
-
-            return ResponseEntity.status(404).body("Producto no encontrado [X_X]");
-        }
-
-        return ResponseEntity.ok(producto);
-
+        return Service.buscarPorGenero(genero);
 
     }
 
     // -- GET: BUSCAR POR EDITORIAL -- //
 
     @GetMapping("/editorial/{editorial}")
-    public ResponseEntity<?> buscarPorEditorial(@PathVariable String editorial) {
+    public List<ProductoResponseDTO> buscarPorEditorial(@PathVariable String editorial) {
         
-        List<ProductoResumenDTO> producto = Service.buscarPorEditorial(editorial);
-
-        if (producto.isEmpty()) {
-
-            return ResponseEntity.status(404).body("Producto no encontrado [X_X]");
-        }
-
-        return ResponseEntity.ok(producto);
+        return Service.buscarPorEditorial(editorial);
 
     }
 
     // -- GET: BUSCAR POR CATEGORIA -- //
 
     @GetMapping("/categoria/{categoria}")
-    public ResponseEntity<?> buscarPorCategoria(@PathVariable String categoria) {
+    public List<ProductoResponseDTO> buscarPorCategoria(@PathVariable String categoria) {
 
-        List<ProductoResumenDTO> producto = Service.buscarPorCategoria(categoria);
+        return Service.buscarPorCategoria(categoria);
 
-        if (producto.isEmpty()) {
-
-            return ResponseEntity.status(404).body("Producto no encontrado [X_X]");
-        }
-
-        return ResponseEntity.ok(producto);
     }
 
     // -- GET: BUSCAR POR AÑO -- //
 
     @GetMapping("/anio/{anio}")
-    public ResponseEntity<?> buscarPorAnio(@PathVariable Integer anio) {
+    public List<ProductoResponseDTO> buscarPorAnio(@PathVariable Integer anio) {
         
-        List<ProductoResumenDTO> producto = Service.buscarPorAnio(anio);
-
-        if (producto.isEmpty()) {
-
-            return ResponseEntity.status(404).body("Producto no encontrado [X_X]");
-        }
-
-        return ResponseEntity.ok(producto);
+        return Service.buscarPorAnio(anio);
 
     }
 
 
-    // -- GET: BUSCAR POR AÑO -- //
+    // -- GET: BUSCAR POR AUTOR -- //
 
     @GetMapping("/autor/{autor}")
-    public ResponseEntity<?> buscarPorAutor(@PathVariable String autor) {
+    public List<ProductoResponseDTO> buscarPorAutor(@PathVariable String autor) {
         
-        List<ProductoResumenDTO> producto = Service.buscarPorAutor(autor);
-
-        if (producto.isEmpty()) {
-
-            return ResponseEntity.status(404).body("Producto no encontrado [X_X]");
-        }
-
-        return ResponseEntity.ok(producto);
+        return Service.buscarPorAutor(autor);
 
     }
 
     // -- POST: CREAR PRODUCTO -- //
     
     @PostMapping("/crear")
-    public ResponseEntity<?> Crear(@Valid @RequestBody Catalogo producto) {
+    public ResponseEntity<String> Crear(@Valid @RequestBody ProductoRequestDTO producto) {
 
-    String mensaje = Service.guardar(producto);
+        String mensaje = Service.guardar(producto);
 
-    if (mensaje.toLowerCase().contains("ya existe")) {
-
-        return ResponseEntity.badRequest().body(mensaje);
+        return ResponseEntity.status(201).body(mensaje);
     }
-
-
-    return ResponseEntity.status(201).body(mensaje);
-}
     
-    // -- DELETE: ELIMINAR PRODUCTO -- //
-
-    @DeleteMapping("/eliminarxid/{id}")
-    public ResponseEntity<?> Eliminar(@PathVariable Integer id) {
-        
-        String mensaje = Service.eliminar(id);
-
-        if (mensaje.toLowerCase().contains("no encontrado") ||
-            mensaje.toLowerCase().contains("no encontrada")) {
-
-            return ResponseEntity.status(404).body(mensaje);
-        }
-        
-        return ResponseEntity.ok(mensaje);
-
-    }
 
     // -- PUT: ACTUALIZAR PRODUCTO -- //
 
-    @PutMapping("/actualizar")
-    public ResponseEntity<?> Actualizar(@Valid @RequestBody Catalogo catalogo) {
+    @PutMapping("/actualizarxid/{id}")
+    public ResponseEntity<String> Actualizar(@PathVariable Integer id, @Valid @RequestBody ProductoRequestDTO catalogo) {
 
-        String mensaje = Service.actualizar(catalogo);
+        String mensaje = Service.actualizar(id, catalogo);
 
-        if (mensaje.toLowerCase().contains("no encontrado") ||
-            mensaje.toLowerCase().contains("no encontrada")) {
-                return ResponseEntity.status(404).body(mensaje);
-        }
         return ResponseEntity.ok(mensaje);
         
+    }
+
+    // === PUT: ACTUALIZAR STOCK === //
+
+    @PutMapping("/descontarstock/{productoId}/{cantidad}")
+    public ResponseEntity<String> descontarStock(@PathVariable Integer productoId, @PathVariable Integer cantidad) {
+
+        String mensaje = Service.descontarStock(productoId, cantidad);
+
+        return ResponseEntity.ok(mensaje);
+    }
+
+    // -- DELETE: ELIMINAR PRODUCTO -- //
+
+    @DeleteMapping("/eliminarxid/{id}")
+    public ResponseEntity<String> Eliminar(@PathVariable Integer id) {
+        
+        String mensaje = Service.eliminar(id);
+        
+        return ResponseEntity.ok(mensaje);
+
     }
 }

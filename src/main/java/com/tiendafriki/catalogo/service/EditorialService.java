@@ -1,12 +1,14 @@
 package com.tiendafriki.catalogo.service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.tiendafriki.catalogo.model.Editorial;
+import com.tiendafriki.catalogo.repository.CatalogoRepo;
 import com.tiendafriki.catalogo.repository.EditorialRepo;
 
 @Service
@@ -15,21 +17,33 @@ public class EditorialService {
     @Autowired
     private EditorialRepo repository;
 
+    @Autowired
+    private CatalogoRepo catalogoRepo;
+
     // -- LISTAR TODAS LAS CATEGORIAS -- //
     public List<Editorial> listar() {
+
         return repository.findAll();
     }
 
     // -- BUSCAR POR ID -- //
 
-    public Optional<Editorial> buscarPorId(Integer id) {
-        return repository.findById(id);
+    public Editorial buscarPorId(Integer id) {
+
+        return repository.findById(id)
+                        .orElseThrow(() ->
+                        new NoSuchElementException
+                        ( "[ERROR] Editorial No Encontrada [X_X] ..."));
     }
 
     // -- BUSCAR POR NOMBRE EDITORIAL -- //
 
-    public Optional<Editorial> buscarPorNombre(String nombre) {
-        return repository.findByNombreIgnoreCase(nombre);
+    public Editorial buscarPorNombre(String nombre) {
+
+        return repository.findByNombreIgnoreCase(nombre)
+                        .orElseThrow(() ->
+                        new NoSuchElementException
+                        ( "[ERROR] Editorial No Encontrada [X_X] ..."));
     }
 
     // -- CREAR EDITORIAL -- //
@@ -47,7 +61,8 @@ public class EditorialService {
 
         if(existente.isPresent()){
 
-            return "[-] La Editorial Ya Existe [X_X] ...";
+             throw new IllegalArgumentException(
+                    "[ERROR] La editorial ya existe [X_X] ...");
 
         }
 
@@ -55,55 +70,76 @@ public class EditorialService {
 
         repository.save(editorial);
 
-        return "[+] La Editorial Se Ha Guardado Correctamente :) ...";
+        return "[+] La Editorial Se Ha Guardado Correctamente ...";
 
     }
 
 
     // -- MÉTODO ACTUALIZAR EDITORIAL (PUT) -- //
 
-    public String actualizar(Editorial editorial) {
+    public String actualizar(Integer id, Editorial editorial) {
 
-        // Creamos una lista de editoriales:
+        // Buscamos Editorial por id:
 
-        List<Editorial> listaEditorial = repository.findAll();
+        Optional<Editorial> editOpt = repository.findById(id);
 
-        // Recorremos la lista de editoriales:
+        // Validamos existencia
 
-        for (Editorial e : listaEditorial) {
+        // isEmpty(): Comprueba si el contenedor Optional esta vacio
 
-            // Si coincide con la id de la editorial que buscamos
+        if(editOpt.isEmpty()){
 
-            if (e.getId().equals(editorial.getId())) {
+            // En caso de no existir, devolvemos mensaje de error
 
-                // guardamos la nueva editorial alli
-
-                repository.save(editorial);
-
-                return "[+] La Editorial Fue Actualizada Correctamente :) ... ";
-
-            }
+            throw new NoSuchElementException(
+                    "[ERROR] Editorial No Encontrada [X_X] ...");
 
         }
-        
 
-        return "[-] Editorial No Encontrada [X_X] ... ";
+        // En caso contrario, guardamos la editorial actualizada
+
+        repository.save(editorial);
+
+        return "[+] La Editorial Fue Actualizada Correctamente ... ";
     }
 
     // -- MÉTODO ELIMINAR EDITORIAL (DELETE) -- //
 
     public String eliminar(Integer id) {
 
-        List<Editorial> listaEditorial = repository.findAll();
+        // Buscamos la editorial por id
 
-        for (Editorial editorial : listaEditorial) {
-            if (editorial.getId().equals(id)) {
-                repository.deleteById(id);
-                return "[+] La Editorial Fue Eliminada Correctamente :) ... ";
-            }
+        Optional<Editorial> editOpt = repository.findById(id);
+
+        // Validamos existencia
+
+        if(editOpt.isEmpty()){
+
+            // En caso de no existir, devolvemos mensaje de error
+
+            throw new NoSuchElementException(
+                    "[ERROR] Editorial No Encontrada [X_X] ...");
+
         }
 
-        return "[-] Editorial No Encontrada [X_X] ... ";
+        // === VALIDAR SI LA EDITORIAL ESTA SIENDO USADA === //
+
+        // Si existe algun producto asociado a esta editorial,
+        // NO permitimos eliminarla
+
+        if (catalogoRepo.existsByEditorialId(id)) {
+
+            throw new IllegalArgumentException(
+                    "[ERROR] No se puede eliminar la editorial porque tiene productos asociados [X_X] ..."
+            );
+        }
+
+        // En caso contrario, eliminamos la editorial
+
+        repository.deleteById(id);
+
+        return "[+] La Editorial Fue Eliminada Correctamente ... ";
+
     }
 
 }

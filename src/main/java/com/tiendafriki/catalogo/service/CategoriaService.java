@@ -1,12 +1,14 @@
 package com.tiendafriki.catalogo.service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.tiendafriki.catalogo.model.Categoria;
+import com.tiendafriki.catalogo.repository.CatalogoRepo;
 import com.tiendafriki.catalogo.repository.CategoriaRepo;
 
 @Service
@@ -15,21 +17,33 @@ public class CategoriaService {
     @Autowired
     private CategoriaRepo repository;
 
+    @Autowired
+    private CatalogoRepo catalogoRepo;
+
     // -- LISTAR TODAS LAS CATEGORIAS -- //
     public List<Categoria> listar() {
+
         return repository.findAll();
     }
 
     // -- BUSCAR POR ID -- //
 
-    public Optional<Categoria> buscarPorId(Integer id) {
-        return repository.findById(id);
+    public Categoria buscarPorId(Integer id) {
+
+        return repository.findById(id)
+                        .orElseThrow(() ->
+                        new NoSuchElementException
+                        ( "[ERROR] Categoria No Encontrada [X_X] ..."));
     }
 
     // -- BUSCAR POR NOMBRE CATEGORIA  -- //
 
-    public Optional<Categoria> buscarPorNombre(String nombre) {
-        return repository.findByNombreIgnoreCase(nombre);
+    public Categoria buscarPorNombre(String nombre) {
+
+        return repository.findByNombreIgnoreCase(nombre)
+                        .orElseThrow(() ->
+                        new NoSuchElementException
+                        ( "[ERROR] Categoria No Encontrada [X_X] ..."));
     }
 
     // -- CREAR CATEGORIA -- //
@@ -47,7 +61,8 @@ public class CategoriaService {
 
         if(existente.isPresent()){
 
-            return "[-] La Categoria Ya Existe [X_X] ...";
+            throw new IllegalArgumentException(
+                    "[ERROR] La categoria ya existe [X_X] ...");
 
         }
 
@@ -55,55 +70,77 @@ public class CategoriaService {
 
         repository.save(categoria);
 
-        return "[+] La Categoria Se Ha Guardado Correctamente :) ...";
+        return "[+] La Categoria Se Ha Guardado Correctamente ...";
 
     }
 
 
     // -- MÉTODO ACTUALIZAR CATEGORIA (PUT) -- //
 
-    public String actualizar(Categoria categoria) {
+    public String actualizar(Integer id, Categoria categoria) {
 
-        // Creamos una lista de categorias:
+        // Buscamos la categoría por id
 
-        List<Categoria> listaCategoria = repository.findAll();
+        Optional<Categoria> cateOpt = repository.findById(id);
 
-        // Recorremos la lista de categorias:
+        // Validamos existencia
 
-        for (Categoria c : listaCategoria) {
+        // isEmpty(): Comprueba si el contenedor Optional esta vacio
 
-            // Si coincide con la id de la categoria que buscamos
+        if(cateOpt.isEmpty()){
 
-            if (c.getId().equals(categoria.getId())) {
+            // En caso de no existir, devolvemos mensaje de error
 
-                // guardamos la nueva categoria alli
-
-                repository.save(categoria);
-
-                return "[+] La Categoria Fue Actualizada Correctamente :) ... ";
-
-            }
+            throw new NoSuchElementException(
+                    "[ERROR] Categoria No Encontrada [X_X] ...");
 
         }
-        
 
-        return "[-] Categoria No Encontrada [X_X] ... ";
+        // En caso contrario, guardamos la categoria actualizada
+
+        repository.save(categoria);
+
+        return "[+] La Categoria Fue Actualizada Correctamente ... ";
+
     }
 
     // -- MÉTODO ELIMINAR CATEGORIA (DELETE) -- //
 
     public String eliminar(Integer id) {
 
-        List<Categoria> listaCategoria = repository.findAll();
+        // Buscamos la editorial por id
 
-        for (Categoria categoria : listaCategoria) {
-            if (categoria.getId().equals(id)) {
-                repository.deleteById(id);
-                return "[+] La Categoria Fue Eliminada Correctamente :) ... ";
-            }
+        Optional<Categoria> CateOpt = repository.findById(id);
+
+        // Validamos existencia
+
+        if(CateOpt.isEmpty()){
+
+            // En caso de no existir, devolvemos mensaje de error
+
+            throw new NoSuchElementException(
+                    "[ERROR] Categoria No Encontrada [X_X] ...");
+
         }
 
-        return "[-] Categoria No Encontrada [X_X] ... ";
+        // === VALIDAR SI LA CATEGORIA ESTA SIENDO USADA === //
+
+        // Si existe algun producto asociado a esta categoria,
+        // NO permitimos eliminarla
+
+        if (catalogoRepo.existsByCategoriaId(id)) {
+
+            throw new IllegalArgumentException(
+                    "[ERROR] No se puede eliminar la categoria porque tiene productos asociados [X_X] ..."
+            );
+        }
+
+        // En caso contrario, eliminamos la editorial
+
+        repository.deleteById(id);
+
+        return "[+] La Categoria Fue Eliminada Correctamente ... ";
+
     }
     
 }

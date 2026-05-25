@@ -1,8 +1,6 @@
 package com.tiendafriki.catalogo.controller;
 
 import java.util.List;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,72 +28,47 @@ public class CategoriaController {
     // -- GET: LISTAR TODO -- //
 
     @GetMapping("/listar")
-    public ResponseEntity<?> listar() {
+    public  List<Categoria> listar() {
 
-        List<Categoria> categoria = Service.listar();
+        return Service.listar();
 
-        return ResponseEntity.ok(categoria);
     }
 
 
     // -- GET: BUSCAR POR ID -- //
 
     @GetMapping("/buscarxid/{id}")
-    public ResponseEntity<?> buscarPorId(@PathVariable Integer id) {
+    public Categoria buscarPorId(@PathVariable Integer id) {
 
-        Optional<Categoria> categoria = Service.buscarPorId(id);
+        return Service.buscarPorId(id);
 
-        if (categoria.isEmpty()) {
-
-            return ResponseEntity.status(404).body("Categoria no encontrada [X_X]");
-        }
-
-        return ResponseEntity.ok(categoria);
     }
 
     // -- GET: BUSCAR POR ID -- //
 
     @GetMapping("/nombre/{nombre}")
-    public ResponseEntity<?> buscarPorNombre(@PathVariable String nombre) {
+    public Categoria buscarPorNombre(@PathVariable String nombre) {
 
-        Optional<Categoria> categoria = Service.buscarPorNombre(nombre);
+        return Service.buscarPorNombre(nombre);
 
-        if (categoria.isEmpty()) {
-
-            return ResponseEntity.status(404).body("Categoria no encontrada [X_X]");
-        }
-
-        return ResponseEntity.ok(categoria);
     }
 
     // -- POST: CREAR CATEGORIA -- //
     
     @PostMapping("/crear")
-    public ResponseEntity<?> Crear(@Valid @RequestBody Categoria categoria) {
+    public ResponseEntity<String> Crear(@Valid @RequestBody Categoria categoria) {
 
-    String mensaje = Service.guardar(categoria);
+        String mensaje = Service.guardar(categoria);
 
-    if (mensaje.toLowerCase().contains("ya existe")) {
-
-        return ResponseEntity.badRequest().body(mensaje);
+        return ResponseEntity.status(201).body(mensaje);
     }
-
-
-    return ResponseEntity.status(201).body(mensaje);
-}
     
     // -- DELETE : ELIMINAR CATEGORIA -- //
 
     @DeleteMapping("/eliminarxid/{id}")
-    public ResponseEntity<?> Eliminar(@PathVariable Integer id) {
+    public ResponseEntity<String> Eliminar(@PathVariable Integer id) {
         
         String mensaje = Service.eliminar(id);
-
-        if (mensaje.toLowerCase().contains("no encontrado") ||
-            mensaje.toLowerCase().contains("no encontrada")) {
-
-            return ResponseEntity.status(404).body(mensaje);
-        }
         
         return ResponseEntity.ok(mensaje);
 
@@ -103,15 +76,11 @@ public class CategoriaController {
 
     // -- PUT: ACTUALIZAR CATEGORIA -- //
 
-    @PutMapping("/actualizar")
-    public ResponseEntity<?> Actualizar(@Valid @RequestBody Categoria categoria) {
+    @PutMapping("/actualizarxid/{id}")
+    public ResponseEntity<String> Actualizar(@PathVariable Integer id, @Valid @RequestBody Categoria categoria) {
 
-        String mensaje = Service.actualizar(categoria);
+        String mensaje = Service.actualizar(id, categoria);
 
-        if (mensaje.toLowerCase().contains("no encontrado") ||
-            mensaje.toLowerCase().contains("no encontrada")) {
-                return ResponseEntity.status(404).body(mensaje);
-        }
         return ResponseEntity.ok(mensaje);
         
     }
