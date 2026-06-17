@@ -1,5 +1,3 @@
-// --- EDITORIAL --- //
-
 package com.tiendafriki.catalogo.model;
 
 import jakarta.validation.constraints.*;

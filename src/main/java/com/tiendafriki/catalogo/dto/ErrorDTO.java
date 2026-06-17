@@ -10,13 +10,11 @@ import java.util.Map;
 @NoArgsConstructor
 public class ErrorDTO {
 
-    private LocalDateTime timeStamp; // Fecha y hora que ocurrió el error
-    private int status; // codigo de estado HTTP
-    private String mensaje; // mensaje general del error
-    private Map<String, String> errores; // Detalla errores por campo 
-    private String path; // ruta del endpoint donde ocurrio el error
-    
-    // CONSTRUCTOR:
+    private LocalDateTime timeStamp; 
+    private int status;
+    private String mensaje; 
+    private Map<String, String> errores; 
+    private String path;
 
     public ErrorDTO(LocalDateTime timestamp, int status, String mensaje, Map<String, String> errores, String path){
 

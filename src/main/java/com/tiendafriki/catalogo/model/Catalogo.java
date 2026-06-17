@@ -1,5 +1,3 @@
-// === CATALOGO === //
-
 package com.tiendafriki.catalogo.model;
 
 import jakarta.persistence.*;
@@ -28,13 +26,9 @@ public class Catalogo {
     @Column(nullable = false)
     private String autor;
 
-    // Relación con editorial
-
     @ManyToOne
     @JoinColumn(name = "ID_Editorial", nullable = false)
     private Editorial editorial;
-
-    // Relación con categoria
 
     @ManyToOne
     @JoinColumn(name = "ID_Categoria", nullable = false)

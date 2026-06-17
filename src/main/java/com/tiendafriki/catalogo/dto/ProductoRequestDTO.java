@@ -28,9 +28,6 @@ public class ProductoRequestDTO {
     @NotBlank(message = "[ERROR] El Autor No Puede Quedar Vacio  [X_X] ... ")
     private String autor;
 
-    // Ahora editorial y categoria
-    // son simples Strings
-
     @NotBlank(message = "[ERROR] La Editorial No Puede Quedar Vacia  [X_X] ... ")
     private String editorial;
 

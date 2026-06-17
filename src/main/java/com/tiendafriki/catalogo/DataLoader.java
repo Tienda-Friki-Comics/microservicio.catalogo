@@ -19,7 +19,6 @@ public class DataLoader {
 
             if (catalogoRepo.count() == 0) {
 
-                // Editoriales
                 Editorial salamandra = editorialRepo.findByNombreIgnoreCase("Salamandra")
                         .orElseGet(() -> editorialRepo.save(new Editorial(null, "Salamandra")));
 
@@ -29,14 +28,12 @@ public class DataLoader {
                 Editorial allen = editorialRepo.findByNombreIgnoreCase("George Allen & Unwin")
                         .orElseGet(() -> editorialRepo.save(new Editorial(null, "George Allen & Unwin")));
 
-                // Categorías
                 Categoria libro = categoriaRepo.findByNombreIgnoreCase("Libro")
                         .orElseGet(() -> categoriaRepo.save(new Categoria(null, "Libro")));
 
                 Categoria manga = categoriaRepo.findByNombreIgnoreCase("Manga")
                         .orElseGet(() -> categoriaRepo.save(new Categoria(null, "Manga")));
 
-                // Datos
                 catalogoRepo.save(new Catalogo(null,
                         "Harry Potter y la piedra filosofal",
                         "Novela",
