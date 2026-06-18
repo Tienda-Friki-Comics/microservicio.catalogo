@@ -1,5 +1,3 @@
-// --- EditorialRepository --- //
-
 package com.tiendafriki.catalogo.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;

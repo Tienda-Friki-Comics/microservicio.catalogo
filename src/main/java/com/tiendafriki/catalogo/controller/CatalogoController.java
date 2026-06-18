@@ -14,9 +14,6 @@ import com.tiendafriki.catalogo.dto.ProductoResponseDTO;
 import jakarta.validation.Valid;
 import java.util.*;
 
-// REVISADO OK
-// Nada que corregir
-
 @RestController
 @RequestMapping("/catalogo")
 public class CatalogoController {
